@@ -241,17 +241,40 @@ gameForm.addEventListener(
                 .getElementById("notes")
                 .value
                 .trim(),
-            dateAdded:
-                new Date()
-                .toISOString()
+            dateAdded: editingGameId
+        ? games.find(
+            g => g.id === editingGameId
+          ).dateAdded
+        : new Date().toISOString()
         };
 
-        games.push(game);
+        if (editingGameId) {
+        
+            const existingGame = games.find(
+                game => game.id === editingGameId
+            );
+        
+            if (existingGame) {
+                existingGame.title = game.title;
+                existingGame.system = game.system;
+                existingGame.price = game.price;
+                existingGame.notes = game.notes;
+            }
+        
+            editingGameId = null;
+        
+            gameForm.querySelector(
+                "button[type='submit']"
+            ).textContent = "Add Game";
+        
+        } else {
+        
+            games.push(game);
+        
+        }
 
         saveGames();
-
         renderGames();
-
         gameForm.reset();
     }
 );
@@ -331,6 +354,49 @@ document
         renderGames();
     }
 );
+
+let editingGameId = null;
+
+document
+.getElementById("editSelected")
+.addEventListener("click", () => {
+    const selected = document.querySelectorAll(
+        ".deleteCheck:checked"
+    );
+
+    if (selected.length !== 1){
+        alert(
+            "Please select exactly one game to edit."
+        );
+        return;
+    }
+
+    const gameId = selected[0].value;
+
+    const game = games.find(
+        g => g.id === gameId
+    );
+
+    if (!game) return;
+
+    document.getElementById("title").value =
+        game.title;
+
+    document.getElementById("system").value =
+        game.system;
+
+    document.getElementById("price").value =
+        game.price;
+
+    document.getElementById("notes").value =
+        game.notes || "";
+
+    editingGameId = game.id;
+
+    gameForm.querySelector(
+        "button[type='submit']"
+    ).textContent = "Save Changes";
+});
 
 document
 .getElementById(

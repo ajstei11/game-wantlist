@@ -69,6 +69,8 @@ button:hover,
     top: 0;
     z-index: 100;
     padding: 10px 0;
+    background: #242424;
+    border-bottom: 1px solid #a5a5a5;
 }
 
 #stats {
