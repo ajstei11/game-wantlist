@@ -2,20 +2,20 @@ const STORAGE_KEY = "gameWantlist";
 
 const CONFIG = {
     systems: [
-        "PC",
         "PlayStation 1",
         "PlayStation 2",
         "PlayStation 3",
         "PlayStation 4",
-        "Xbox One",
-        "Xbox Series X|S",
-        "Nintendo Switch",
-        "Switch 2",
         "Nintendo Entertainment System",
         "Super Nintendo Entertainment System",
+        "Nintendo 64",
         "GameCube",
+        "Wii",
+        "Nintendo Switch",
+        "Switch 2",
         "Microsoft Xbox",
-        "Wii"
+        "Xbox One",
+        "Xbox Series X|S",
     ]
 };
 
