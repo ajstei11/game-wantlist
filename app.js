@@ -1,5 +1,34 @@
 const STORAGE_KEY = "gameWantlist";
 
+const CONFIG = {
+    systems: [
+        "PC",
+        "PlayStation 1",
+        "PlayStation 2",
+        "PlayStation 3",
+        "PlayStation 4",
+        "Xbox One",
+        "Xbox Series X|S",
+        "Nintendo Switch",
+        "Switch 2",
+        "Nintendo Entertainment System",
+        "Super Nintendo Entertainment System",
+        "GameCube",
+        "Microsoft Xbox",
+        "Wii"
+    ]
+};
+
+function populateSystemDropdowns() {
+    const systemSelect = document.getElementById("system");
+    const systemFilter = document.getElementById("systemFilter");
+
+    CONFIG.systems.forEach(system => {
+        systemSelect.add(new Option (system, system));
+        systemFilter.add(new Option (system, system));
+    });
+}
+
 let games =
     JSON.parse(
         localStorage.getItem(STORAGE_KEY)
@@ -417,3 +446,5 @@ sortBy.value =
     ) || "title-asc";
 
 renderGames();
+
+populateSystemDropdowns();
