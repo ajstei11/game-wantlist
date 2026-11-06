@@ -23,7 +23,7 @@ header {
 .card {
     background: #242424;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 20px;
 }
 
@@ -35,6 +35,7 @@ form {
 input,
 select,
 textarea {
+    font-size: 16px;
     width: 100%;
     padding: 10px;
     background: #333;
@@ -45,6 +46,7 @@ textarea {
 
 button,
 .import-btn {
+    min-height: 44px;
     background: #498b38;
     color: white;
     border: none;
@@ -63,6 +65,10 @@ button:hover,
     gap: 20px;
     flex-wrap: wrap;
     margin-bottom: 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 10px 0;
 }
 
 #stats {
@@ -72,6 +78,7 @@ button:hover,
 
 .table-container {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 table {
@@ -88,6 +95,11 @@ td {
 
 th {
     background: #2f2f2f;
+}
+
+.title-col,
+td.title-col {
+    /* place holder for mobile sizing */
 }
 
 .button-row {
@@ -112,11 +124,10 @@ th {
 
 @media (max-width: 768px) {
 
-    .toolbar {
-        flex-direction: column;
-    }
-
-    table {
-        font-size: 14px;
+    .title-col,
+    td.title-col {
+        width: 18ch;
+        min-width: 18ch;
     }
 }
+
