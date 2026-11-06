@@ -1,148 +1,419 @@
 const STORAGE_KEY = "gameWantlist";
 
-let games = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+let games =
+    JSON.parse(
+        localStorage.getItem(STORAGE_KEY)
+    ) || [];
 
-const gameForm = document.getElementById("gameForm");
-const gameList = document.getElementById("gameList");
-const searchInput = document.getElementById("searchInput");
-const exportBtn = document.getElementById("exportBtn");
-const importFile = document.getElementById("importFile");
+const gameForm =
+    document.getElementById("gameForm");
+
+const tableBody =
+    document.getElementById("gameTableBody");
+
+const systemFilter =
+    document.getElementById("systemFilter");
+
+const sortBy =
+    document.getElementById("sortBy");
+
+const stats =
+    document.getElementById("stats");
 
 function saveGames() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(games));
+    localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(games)
+    );
 }
 
-function renderGames(filter = "") {
-    gameList.innerHTML = "";
+function formatDate(date) {
 
-    const filteredGames = games.filter(game =>
-        game.title.toLowerCase().includes(filter.toLowerCase())
-    );
+    return new Date(date)
+        .toLocaleDateString();
+}
 
-    if (filteredGames.length === 0) {
-        gameList.innerHTML =
-            '<div class="empty">No games found.</div>';
+function updateStats() {
+
+    const totalGames = games.length;
+
+    const totalCost =
+        games.reduce(
+            (sum, game) =>
+                sum + Number(game.price || 0),
+            0
+        );
+
+    stats.innerHTML = `
+        Games: ${totalGames}
+        |
+        Estimated Total:
+        $${totalCost.toFixed(2)}
+    `;
+}
+
+function renderGames() {
+
+    let filtered = [...games];
+
+    if (
+        systemFilter.value !== "All"
+    ) {
+        filtered =
+            filtered.filter(
+                game =>
+                    game.system ===
+                    systemFilter.value
+            );
+    }
+
+    switch (sortBy.value) {
+
+        case "title-asc":
+            filtered.sort((a, b) =>
+                a.title.localeCompare(
+                    b.title
+                )
+            );
+            break;
+
+        case "title-desc":
+            filtered.sort((a, b) =>
+                b.title.localeCompare(
+                    a.title
+                )
+            );
+            break;
+
+        case "price-asc":
+            filtered.sort(
+                (a, b) =>
+                    a.price - b.price
+            );
+            break;
+
+        case "price-desc":
+            filtered.sort(
+                (a, b) =>
+                    b.price - a.price
+            );
+            break;
+
+        case "date-asc":
+            filtered.sort(
+                (a, b) =>
+                    new Date(
+                        a.dateAdded
+                    ) -
+                    new Date(
+                        b.dateAdded
+                    )
+            );
+            break;
+
+        case "date-desc":
+            filtered.sort(
+                (a, b) =>
+                    new Date(
+                        b.dateAdded
+                    ) -
+                    new Date(
+                        a.dateAdded
+                    )
+            );
+            break;
+    }
+
+    tableBody.innerHTML = "";
+
+    if (filtered.length === 0) {
+
+        tableBody.innerHTML = `
+            <tr>
+                <td
+                    colspan="6"
+                    class="empty-row"
+                >
+                    No games found.
+                </td>
+            </tr>
+        `;
+
+        updateStats();
         return;
     }
 
-    filteredGames.forEach(game => {
-        const card = document.createElement("div");
-        card.className = "game-card";
+    filtered.forEach(game => {
 
-        const priorityClass =
-            game.priority === "High"
-                ? "priority-high"
-                : game.priority === "Medium"
-                ? "priority-medium"
-                : "priority-low";
+        const row =
+            document.createElement("tr");
 
-        card.innerHTML = `
-            <h3>${game.title}</h3>
-
-            <div class="game-meta">
-                ${game.platform} •
-                <span class="${priorityClass}">
-                    ${game.priority}
-                </span>
-                • ${game.status}
-            </div>
-
-            <div>
-                Price: ${
-                    game.price
-                        ? "$" + Number(game.price).toFixed(2)
-                        : "N/A"
-                }
-            </div>
-
-            <p>${game.notes || ""}</p>
-
-            <div class="game-actions">
-                <button
-                    class="delete-btn"
-                    onclick="deleteGame('${game.id}')"
+        row.innerHTML = `
+            <td>
+                <input
+                    type="checkbox"
+                    class="deleteCheck"
+                    value="${game.id}"
                 >
-                    Delete
-                </button>
-            </div>
+            </td>
+
+            <td>${game.title}</td>
+
+            <td>${game.system}</td>
+
+            <td>
+                $${Number(
+                    game.price || 0
+                ).toFixed(2)}
+            </td>
+
+            <td>
+                ${formatDate(
+                    game.dateAdded
+                )}
+            </td>
+
+            <td>
+                ${game.notes || ""}
+            </td>
         `;
 
-        gameList.appendChild(card);
+        tableBody.appendChild(row);
     });
+
+    updateStats();
 }
 
-function deleteGame(id) {
-    games = games.filter(game => game.id !== id);
-    saveGames();
-    renderGames(searchInput.value);
-}
+gameForm.addEventListener(
+    "submit",
+    event => {
 
-gameForm.addEventListener("submit", e => {
-    e.preventDefault();
+        event.preventDefault();
 
-    const game = {
-        id: crypto.randomUUID(),
-        title: document.getElementById("title").value.trim(),
-        platform: document.getElementById("platform").value,
-        priority: document.getElementById("priority").value,
-        status: document.getElementById("status").value,
-        price: document.getElementById("price").value,
-        notes: document.getElementById("notes").value.trim()
-    };
+        const game = {
+            id: crypto.randomUUID(),
+            title:
+                document
+                .getElementById("title")
+                .value
+                .trim(),
+            system:
+                document
+                .getElementById("system")
+                .value,
+            price:
+                Number(
+                    document
+                    .getElementById("price")
+                    .value
+                ) || 0,
+            notes:
+                document
+                .getElementById("notes")
+                .value
+                .trim(),
+            dateAdded:
+                new Date()
+                .toISOString()
+        };
 
-    games.push(game);
+        games.push(game);
 
-    saveGames();
-    renderGames(searchInput.value);
+        saveGames();
 
-    gameForm.reset();
-});
+        renderGames();
 
-searchInput.addEventListener("input", e => {
-    renderGames(e.target.value);
-});
+        gameForm.reset();
+    }
+);
 
-exportBtn.addEventListener("click", () => {
-    const blob = new Blob(
-        [JSON.stringify(games, null, 2)],
-        { type: "application/json" }
-    );
+systemFilter.addEventListener(
+    "change",
+    () => {
 
-    const url = URL.createObjectURL(blob);
+        localStorage.setItem(
+            "systemFilter",
+            systemFilter.value
+        );
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "game-wantlist.json";
-    a.click();
+        renderGames();
+    }
+);
 
-    URL.revokeObjectURL(url);
-});
+sortBy.addEventListener(
+    "change",
+    () => {
 
-importFile.addEventListener("change", event => {
-    const file = event.target.files[0];
+        localStorage.setItem(
+            "sortBy",
+            sortBy.value
+        );
 
-    if (!file) return;
+        renderGames();
+    }
+);
 
-    const reader = new FileReader();
+document
+.getElementById(
+    "deleteSelected"
+)
+.addEventListener(
+    "click",
+    () => {
 
-    reader.onload = e => {
-        try {
-            const importedGames = JSON.parse(e.target.result);
+        const selectedIds =
+            Array.from(
+                document
+                .querySelectorAll(
+                    ".deleteCheck:checked"
+                )
+            )
+            .map(
+                box => box.value
+            );
 
-            if (Array.isArray(importedGames)) {
-                games = importedGames;
-                saveGames();
-                renderGames(searchInput.value);
-                alert("Import successful!");
-            } else {
-                alert("Invalid file format.");
-            }
-        } catch {
-            alert("Unable to read file.");
+        if (
+            selectedIds.length === 0
+        ) {
+            alert(
+                "No games selected."
+            );
+            return;
         }
-    };
 
-    reader.readAsText(file);
-});
+        if (
+            !confirm(
+                `Delete ${selectedIds.length} game(s)?`
+            )
+        ) {
+            return;
+        }
+
+        games =
+            games.filter(
+                game =>
+                    !selectedIds.includes(
+                        game.id
+                    )
+            );
+
+        saveGames();
+
+        renderGames();
+    }
+);
+
+document
+.getElementById(
+    "exportBtn"
+)
+.addEventListener(
+    "click",
+    () => {
+
+        const blob =
+            new Blob(
+                [
+                    JSON.stringify(
+                        games,
+                        null,
+                        2
+                    )
+                ],
+                {
+                    type:
+                        "application/json"
+                }
+            );
+
+        const url =
+            URL.createObjectURL(
+                blob
+            );
+
+        const a =
+            document.createElement(
+                "a"
+            );
+
+        a.href = url;
+        a.download =
+            "game-wantlist.json";
+
+        a.click();
+
+        URL.revokeObjectURL(
+            url
+        );
+    }
+);
+
+document
+.getElementById(
+    "importFile"
+)
+.addEventListener(
+    "change",
+    event => {
+
+        const file =
+            event.target.files[0];
+
+        if (!file) return;
+
+        const reader =
+            new FileReader();
+
+        reader.onload =
+            e => {
+
+                try {
+
+                    const imported =
+                        JSON.parse(
+                            e.target.result
+                        );
+
+                    if (
+                        Array.isArray(
+                            imported
+                        )
+                    ) {
+
+                        games =
+                            imported;
+
+                        saveGames();
+
+                        renderGames();
+
+                        alert(
+                            "Import successful."
+                        );
+                    }
+
+                } catch {
+
+                    alert(
+                        "Invalid file."
+                    );
+                }
+            };
+
+        reader.readAsText(
+            file
+        );
+    }
+);
+
+systemFilter.value =
+    localStorage.getItem(
+        "systemFilter"
+    ) || "All";
+
+sortBy.value =
+    localStorage.getItem(
+        "sortBy"
+    ) || "title-asc";
 
 renderGames();
