@@ -45,7 +45,7 @@ textarea {
 
 button,
 .import-btn {
-    background: #2563eb;
+    background: #498b38;
     color: white;
     border: none;
     padding: 10px 14px;
@@ -55,7 +55,7 @@ button,
 
 button:hover,
 .import-btn:hover {
-    background: #1d4ed8;
+    background: #3c742e;
 }
 
 .toolbar {
