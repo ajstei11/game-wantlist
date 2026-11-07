@@ -14,6 +14,7 @@ const CONFIG = {
         "Nintendo Switch",
         "Switch 2",
         "Microsoft Xbox",
+        "Xbox 360",
         "Xbox One",
         "Xbox Series X|S",
     ]
